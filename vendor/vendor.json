@@ -1,0 +1,31 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "R3qFe7+JDLGggKkccez2Il3dBfk=",
+			"path": "github.com/songgao/packets/ethernet",
+			"revision": "549a10cd4091c1e78542d3bb357036299cb9fcd6",
+			"revisionTime": "2016-04-04T18:24:56Z"
+		},
+		{
+			"checksumSHA1": "RLpQUDhalw3UAk7m6jP6dYmogQY=",
+			"path": "github.com/songgao/water",
+			"revision": "ee9c96d609a0b5c5ad04ed0171a139a6263a3d3c",
+			"revisionTime": "2017-01-23T01:49:06Z"
+		},
+		{
+			"checksumSHA1": "kQB2wRB3twjUp615F6zEwGHjNe0=",
+			"path": "golang.org/x/sys/windows",
+			"revision": "e4594059fe4cde2daf423055a596c2cd1e6c9adf",
+			"revisionTime": "2017-02-23T22:36:15Z"
+		},
+		{
+			"checksumSHA1": "ZdFZFaXmCgEEaEhVPkyXrnhKhsg=",
+			"path": "golang.org/x/sys/windows/registry",
+			"revision": "e4594059fe4cde2daf423055a596c2cd1e6c9adf",
+			"revisionTime": "2017-02-23T22:36:15Z"
+		}
+	],
+	"rootPath": "github.com/kdada/tinyvpn"
+}
