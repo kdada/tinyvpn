@@ -90,7 +90,8 @@ func (rwc *noPIReadWriteCloser) Read(p []byte) (n int, err error) {
 // Write writes a packet to original ReadWriteCloser
 func (rwc *noPIReadWriteCloser) Write(p []byte) (n int, err error) {
 	copy(rwc.wBuffer[4:], p)
-	return rwc.ReadWriteCloser.Write(rwc.wBuffer[:len(p)+4])
+	n, err = rwc.ReadWriteCloser.Write(rwc.wBuffer[:len(p)+4])
+	return n - 4, err
 }
 
 // Close closes ReadWriteCloser
