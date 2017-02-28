@@ -6,45 +6,64 @@ import (
 	"os"
 	"os/signal"
 
+	"flag"
+
+	"github.com/kdada/tinyvpn/pkg/proto"
 	"github.com/kdada/tinyvpn/pkg/tun"
+	"github.com/xtaci/kcp-go"
 )
 
+var server string
+var local string
+var remote string
+var route string
+
+func init() {
+	flag.StringVar(&server, "s", "", "host:port e.g. 22.22.22.22:9989")
+	flag.StringVar(&local, "l", "", "local ip e.g. 10.0.0.2")
+	flag.StringVar(&remote, "r", "", "remote ip e.g. 10.0.0.1")
+	flag.StringVar(&route, "d", "", "default route e.g. 10.0.0.0/24")
+}
+
 func main() {
+	flag.Parse()
 	log.SetFlags(log.Lshortfile | log.Ldate)
-	srcIP := net.ParseIP("10.0.0.2")
-	destIP := net.ParseIP("10.0.0.1")
-	device, err := tun.CreateDevice(srcIP, destIP)
+	log.Println("tinyvpn client started")
+	device, err := tun.CreateDevice(net.ParseIP(local), net.ParseIP(remote))
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 	defer device.Close()
 
 	// add route
-	_, x, _ := net.ParseCIDR("10.0.0.0/24")
-	device.AddRoute(x)
-
-	log.Println("start listen tunnel")
-	go Output(device)
-
-	ch := make(chan os.Signal)
-	signal.Notify(ch, os.Interrupt)
-	sig := <-ch
-	log.Println("exit because of", sig.String())
-}
-
-func Output(device *tun.Device) {
-	data := make([]byte, 4096)
-	ipp := tun.IPPacket(data)
-	for true {
-		count, err := device.Read(data)
-		if err != nil {
-			log.Println("read error:", err)
-			return
-		}
-		log.Println("data length:", count)
-		log.Print("src ip: ")
-		log.Println(ipp.SrcIP())
-		log.Print("dest ip: ")
-		log.Println(ipp.DestIP())
+	_, r, err := net.ParseCIDR(route)
+	if err != nil {
+		log.Fatalln(err)
 	}
+	device.AddRoute(r)
+
+	// connect
+	conn, err := kcp.DialWithOptions(server, nil, 10, 3)
+	if err != nil {
+		panic(err)
+	}
+	log.Println("tunnel connected")
+
+	running := true
+
+	sender := proto.Pipe("sender", &running, device, conn)
+	receiver := proto.Pipe("receiver", &running, conn, device)
+
+	sig := make(chan os.Signal)
+	signal.Notify(sig, os.Interrupt)
+
+	select {
+	case <-sender:
+		log.Println("exit because of sender failed")
+	case <-receiver:
+		log.Println("exit because of receiver failed")
+	case <-sig:
+		log.Println("exit because of user")
+	}
+	log.Println("tinyvpn client stoped")
 }
