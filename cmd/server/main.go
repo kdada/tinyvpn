@@ -88,13 +88,20 @@ func listen(device *tun.Device) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	listener.SetReadBuffer(4096 * 1024)
+	listener.SetWriteBuffer(4096 * 1024)
 	go func() {
 		for true {
-			conn, err := listener.Accept()
+			conn, err := listener.AcceptKCP()
 			if err != nil {
 				log.Println("listen error", err)
 			} else {
 				log.Println("accept", conn.RemoteAddr())
+				conn.SetNoDelay(1, 30, 2, 1)
+				conn.SetReadBuffer(4096 * 1024)
+				conn.SetWriteBuffer(4096 * 1024)
+				conn.SetWindowSize(1024, 1024)
+				conn.SetACKNoDelay(true)
 				register(device, conn)
 			}
 		}

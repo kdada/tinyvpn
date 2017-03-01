@@ -44,6 +44,11 @@ func main() {
 
 	// connect
 	conn, err := kcp.DialWithOptions(server, nil, 10, 3)
+	conn.SetNoDelay(1, 30, 2, 1)
+	conn.SetReadBuffer(4096 * 1024)
+	conn.SetWriteBuffer(4096 * 1024)
+	conn.SetWindowSize(1024, 1024)
+	conn.SetACKNoDelay(true)
 	if err != nil {
 		panic(err)
 	}
