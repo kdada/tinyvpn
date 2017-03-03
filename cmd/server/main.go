@@ -1,18 +1,16 @@
 package main
 
 import (
+	"encoding/binary"
 	"flag"
+	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 
-	"encoding/binary"
-
-	"fmt"
-
 	"github.com/kdada/tinyvpn/pkg/tun"
-	kcp "github.com/xtaci/kcp-go"
+	"github.com/xtaci/kcp-go"
 )
 
 var server string
