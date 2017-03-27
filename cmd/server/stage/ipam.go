@@ -41,7 +41,7 @@ func init() {
 	ServerIP = ipam.ConvertIPToInt(ip)
 
 	// add routes
-	buf := bytes.NewBuffer(make([]byte, 60000))
+	buf := bytes.NewBuffer(make([]byte, 0, 60000))
 	buf.Write(ip)
 	buf.WriteByte(32)
 
@@ -51,6 +51,7 @@ func init() {
 		os.Exit(-1)
 	}
 	reader := bufio.NewReader(bytes.NewReader(data))
+	count := 0
 	for true {
 		l, err := reader.ReadString('\n')
 		if err != nil {
@@ -63,9 +64,10 @@ func init() {
 
 		buf.Write(rip)
 		buf.WriteByte(byte(m))
+		count++
 	}
 	Routes = buf.Bytes()
-	log.Println("routes:", len(Routes))
+	log.Println("routes:", len(Routes), count)
 
 	ips = &net.IPNet{
 		IP:   ip,
