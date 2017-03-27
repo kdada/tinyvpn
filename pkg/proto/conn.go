@@ -80,9 +80,7 @@ func (c *Connection) Resume(handler *ConnectionHandler) error {
 	go func() {
 		for !suspend {
 			protocol := NewXProtocol()
-			log.Println("===start===")
 			_, err := protocol.ReadFrom(c.Session)
-			log.Println("===start===", err)
 			if err != nil {
 				c.Close(err.Error())
 				break
