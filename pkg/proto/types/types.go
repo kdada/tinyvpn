@@ -16,7 +16,7 @@ type ConfigRequest struct {
 }
 
 type Config struct {
-	Routes [][5]byte
+	Routes []byte
 }
 
 type Packet []byte

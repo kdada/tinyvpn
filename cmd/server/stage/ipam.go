@@ -16,7 +16,7 @@ import (
 
 var IPAddressManager *ipam.IPAM
 var ServerIP uint32
-var Routes [][5]byte
+var Routes []byte
 var connectionIPs map[*proto.Connection]uint32
 
 func init() {
@@ -41,11 +41,10 @@ func init() {
 	ServerIP = ipam.ConvertIPToInt(ip)
 
 	// add routes
-	r := [5]byte{}
-	r[4] = 32
-	copy(r[:], ip)
-	Routes = make([][5]byte, 0, 10000)
-	Routes = append(Routes, r)
+	buf := bytes.NewBuffer(make([]byte, 60000))
+	buf.Write(ip)
+	buf.WriteByte(32)
+
 	data, err := ioutil.ReadFile("./out.txt")
 	if err != nil {
 		log.Println(err)
@@ -62,11 +61,10 @@ func init() {
 		x := arrs[1]
 		m, err := strconv.Atoi(x[:len(x)-1])
 
-		r = [5]byte{}
-		copy(r[:], rip)
-		r[4] = byte(m)
-		Routes = append(Routes, r)
+		buf.Write(rip)
+		buf.WriteByte(byte(m))
 	}
+	Routes = buf.Bytes()
 	log.Println("routes:", len(Routes))
 
 	ips = &net.IPNet{
