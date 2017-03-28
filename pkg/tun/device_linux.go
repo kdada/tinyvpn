@@ -12,16 +12,12 @@ import (
 	"github.com/songgao/water"
 )
 
-var regIf = regexp.MustCompile(`dev *(\s+)`)
+var regIf = regexp.MustCompile(`dev *(\S+)`)
 
 // AddRoute adds route to default device.
 func AddRoute(ip *net.IPNet) error {
 	ip.IP = ip.IP.Mask(ip.Mask)
 	cmd := exec.Command("ip", "r", "get", ip.IP.String())
-	err := cmd.Run()
-	if err != nil {
-		return err
-	}
 	data, err := cmd.Output()
 	if err != nil {
 		return err

@@ -18,16 +18,12 @@ const (
 	SizePI = 4
 )
 
-var regIf = regexp.MustCompile(`interface: *(\s+)`)
+var regIf = regexp.MustCompile(`gateway: *(\d+\.\d+\.\d+\.\d+)`)
 
 // AddRoute adds route to default device.
 func AddRoute(ip *net.IPNet) error {
 	ip.IP = ip.IP.Mask(ip.Mask)
 	cmd := exec.Command("route", "-n", "get", ip.IP.String())
-	err := cmd.Run()
-	if err != nil {
-		return err
-	}
 	data, err := cmd.Output()
 	if err != nil {
 		return err
@@ -36,8 +32,9 @@ func AddRoute(ip *net.IPNet) error {
 	if len(result) != 2 {
 		return fmt.Errorf("can't find interface name by net: %s", ip.String())
 	}
-	sIf := string(result[1])
-	return addRoute(sIf, ip)
+	gw := string(result[1])
+	cmd = exec.Command("route", "-n", "add", ip.String(), gw)
+	return cmd.Run()
 }
 
 // CreateDevice create a device via ip.
