@@ -2,6 +2,7 @@ package stage
 
 import (
 	"net"
+	"strings"
 
 	"github.com/kdada/tinyvpn/pkg/proto/types"
 	"github.com/kdada/tinyvpn/pkg/tun"
@@ -31,6 +32,15 @@ func AddRoutes(routes []byte) error {
 		}
 	}
 	return nil
+}
+
+func AddDefaultRoute(ip string) error {
+	ip = strings.Split(ip, ":")[0]
+	_, s, err := net.ParseCIDR(ip + "/32")
+	if err != nil {
+		return err
+	}
+	return tun.AddRoute(s)
 }
 
 func Write(obj types.Packet) {

@@ -43,5 +43,10 @@ func (h *AuthHandler) auth(obj interface{}) {
 		log.Println(err)
 		return
 	}
+	err = AddDefaultRoute(h.Connection.Session.RemoteAddr().String())
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	h.Machine.Trigger(utils.AuthenticateSucessfully, nil)
 }
