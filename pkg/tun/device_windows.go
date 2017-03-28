@@ -19,6 +19,29 @@ const (
 	SizeEthernetHeader = 22
 )
 
+var regIf = regexp.MustCompile(`1 *(\d+.\d+.\d+.\d+)`)
+
+// AddRoute adds route to default device.
+func AddRoute(ip *net.IPNet) error {
+	ip.IP = ip.IP.Mask(ip.Mask)
+	cmd := exec.Command("pathping", "-n", "-w", "1", "-h", "1", "-q", "1", ip.IP.String())
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+	data, err := cmd.Output()
+	if err != nil {
+		return err
+	}
+	result := regIf.FindSubmatch(data)
+	if len(result) != 2 {
+		return fmt.Errorf("can't find interface name by net: %s", ip.String())
+	}
+	sIf := string(result[1])
+	cmd := exec.Command("route", "add", ip.String(), sIf)
+	return cmd.Run()
+}
+
 // CreateDevice create a device via ip. Must install tap driver before creating device on windows.
 func CreateDevice(srcIP net.IP, destIP net.IP) (*Device, error) {
 	ifce, err := water.New(water.Config{
