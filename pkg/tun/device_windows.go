@@ -25,10 +25,6 @@ var regIf = regexp.MustCompile(`1 *(\d+.\d+.\d+.\d+)`)
 func AddRoute(ip *net.IPNet) error {
 	ip.IP = ip.IP.Mask(ip.Mask)
 	cmd := exec.Command("pathping", "-n", "-w", "1", "-h", "1", "-q", "1", ip.IP.String())
-	err := cmd.Run()
-	if err != nil {
-		return err
-	}
 	data, err := cmd.Output()
 	if err != nil {
 		return err
