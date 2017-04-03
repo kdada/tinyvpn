@@ -19,12 +19,12 @@ const (
 	SizeEthernetHeader = 22
 )
 
-var regIf = regexp.MustCompile(`1 *(\d+.\d+.\d+.\d+)`)
+var regIf = regexp.MustCompile(`0.0.0.0 *0.0.0.0 *(\d+.\d+.\d+.\d+)`)
 
 // AddRoute adds route to default device.
 func AddRoute(ip *net.IPNet) error {
 	ip.IP = ip.IP.Mask(ip.Mask)
-	cmd := exec.Command("pathping", "-n", "-w", "1", "-h", "1", "-q", "1", ip.IP.String())
+	cmd := exec.Command("route", "print", "-4")
 	data, err := cmd.Output()
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func AddRoute(ip *net.IPNet) error {
 		return fmt.Errorf("can't find interface name by net: %s", ip.String())
 	}
 	sIf := string(result[1])
-	cmd := exec.Command("route", "add", ip.String(), sIf)
+	cmd = exec.Command("route", "add", ip.String(), sIf)
 	return cmd.Run()
 }
 
@@ -111,7 +111,7 @@ func startDevice(srcIP net.IP, destIP net.IP) (net.HardwareAddr, string, error) 
 
 	// set ip to interface
 	cmd = exec.Command("netsh", "interface", "ip", "set", "address", "name=", tunIf.Name, "source=",
-		"static", "addr=", srcIP.String(), "mask=", "255.255.255.255", "gateway=", destIP.String())
+		"static", "addr=", srcIP.String(), "mask=", "255.255.255.255") // "gateway=", destIP.String()
 	return tunIf.HardwareAddr, strconv.Itoa(tunIf.Index), cmd.Run()
 }
 
