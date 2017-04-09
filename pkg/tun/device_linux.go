@@ -30,6 +30,13 @@ func AddRoute(ip *net.IPNet) error {
 	return addRoute(sIf, ip)
 }
 
+// DeleteRoute deletes a route
+func DeleteRoute(ip *net.IPNet) error {
+	ip.IP = ip.IP.Mask(ip.Mask)
+	cmd := exec.Command("ip", "r", "delete", ip.String())
+	return cmd.Run()
+}
+
 // CreateDevice create a device via ip.
 func CreateDevice(srcIP net.IP, destIP net.IP) (*Device, error) {
 	ifce, err := water.New(water.Config{

@@ -38,6 +38,11 @@ func AddRoute(ip *net.IPNet) error {
 	return cmd.Run()
 }
 
+// DeleteRoute deletes a route
+func DeleteRoute(ip *net.IPNet) error {
+	return deleteRoute(ip)
+}
+
 // CreateDevice create a device via ip. Must install tap driver before creating device on windows.
 func CreateDevice(srcIP net.IP, destIP net.IP) (*Device, error) {
 	ifce, err := water.New(water.Config{
