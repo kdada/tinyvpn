@@ -14,12 +14,21 @@ const (
 )
 
 // Device describes an tunnel device. Read/Write one ip packet at once.
+type Device interface {
+	io.ReadWriteCloser
+	// AddRoute adds route for device
+	AddRoute(r *net.IPNet) error
+	// ClearRoutes clears all routes
+	ClearRoutes() error
+}
+
+// Device describes an tunnel device. Read/Write one ip packet at once.
 // Must not read/write data in parallel.
 // If the read buffer is smaller than received packet length, device will truncate
 // the packet and copy to read buffer. Then drop the packet.
 // If the write buffer is larger than MaxPacketSize or smaller than MinPacketSize, device will drop the packet and
 // return an error.
-type Device struct {
+type CommonDevice struct {
 	io.ReadWriteCloser
 	// Name is device name
 	Name string
@@ -36,7 +45,7 @@ type Device struct {
 }
 
 // AddRoute adds route for device
-func (d *Device) AddRoute(r *net.IPNet) error {
+func (d *CommonDevice) AddRoute(r *net.IPNet) error {
 	r = &net.IPNet{
 		IP:   r.IP.Mask(r.Mask),
 		Mask: r.Mask,
@@ -50,7 +59,7 @@ func (d *Device) AddRoute(r *net.IPNet) error {
 }
 
 // ClearRoutes clears all routes
-func (d *Device) ClearRoutes() error {
+func (d *CommonDevice) ClearRoutes() error {
 	for i, r := range d.Routes {
 		err := d.deleteRoute(r)
 		if err != nil {
@@ -63,7 +72,7 @@ func (d *Device) ClearRoutes() error {
 }
 
 // Close closes the device
-func (d *Device) Close() error {
+func (d *CommonDevice) Close() error {
 	err := d.ClearRoutes()
 	if err != nil {
 		return err

@@ -8,7 +8,7 @@ import (
 	"github.com/kdada/tinyvpn/pkg/tun"
 )
 
-var Device *tun.Device
+var Device tun.Device
 
 func StartDevice(src, dest net.IP) error {
 	device, err := tun.CreateDevice(src, dest)

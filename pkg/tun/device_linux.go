@@ -38,7 +38,7 @@ func DeleteRoute(ip *net.IPNet) error {
 }
 
 // CreateDevice create a device via ip.
-func CreateDevice(srcIP net.IP, destIP net.IP) (*Device, error) {
+func CreateDevice(srcIP net.IP, destIP net.IP) (Device, error) {
 	ifce, err := water.New(water.Config{
 		DeviceType: water.TUN,
 	})
@@ -50,7 +50,7 @@ func CreateDevice(srcIP net.IP, destIP net.IP) (*Device, error) {
 	if err != nil {
 		return nil, err
 	}
-	dev := &Device{
+	dev := &CommonDevice{
 		ReadWriteCloser: ifce.ReadWriteCloser,
 		Name:            devName,
 		SrcIP:           srcIP,

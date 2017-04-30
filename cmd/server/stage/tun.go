@@ -10,7 +10,7 @@ import (
 	"github.com/kdada/tinyvpn/pkg/tun"
 )
 
-var Device *tun.Device
+var Device tun.Device
 var dispatcher map[uint32]utils.Handler
 
 func StartDevice(ip *net.IPNet) error {

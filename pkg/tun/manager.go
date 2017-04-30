@@ -12,14 +12,14 @@ type Handler func(packet IPPacket)
 // DeviceManager manages a tun device and send/recv packet to/from device
 type DeviceManager struct {
 	lock         sync.RWMutex
-	Device       *Device
+	Device       Device
 	Default      Handler
 	DestHandlers map[uint32]Handler
 	SendBuffer   chan IPPacket
 }
 
 // NewDeviceManager creates DeviceManager
-func NewDeviceManager(device *Device, sendBufferSize int) *DeviceManager {
+func NewDeviceManager(device Device, sendBufferSize int) *DeviceManager {
 	return &DeviceManager{
 		Device:     device,
 		SendBuffer: make(chan IPPacket, sendBufferSize),

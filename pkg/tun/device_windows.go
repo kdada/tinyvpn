@@ -44,7 +44,7 @@ func DeleteRoute(ip *net.IPNet) error {
 }
 
 // CreateDevice create a device via ip. Must install tap driver before creating device on windows.
-func CreateDevice(srcIP net.IP, destIP net.IP) (*Device, error) {
+func CreateDevice(srcIP net.IP, destIP net.IP) (Device, error) {
 	ifce, err := water.New(water.Config{
 		DeviceType: water.TAP,
 		PlatformSpecificParams: water.PlatformSpecificParams{
@@ -63,7 +63,7 @@ func CreateDevice(srcIP net.IP, destIP net.IP) (*Device, error) {
 	destMac := make([]byte, 6)
 	copy(destMac, srcMac)
 	destMac[5]++
-	dev := &Device{
+	dev := &CommonDevice{
 		ReadWriteCloser: newIPReadWriteCloser(srcMac, destMac, srcIP, destIP, ifce.ReadWriteCloser),
 		Name:            devName,
 		SrcIP:           srcIP,
