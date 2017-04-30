@@ -2,6 +2,7 @@ package tun
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"net"
 )
@@ -78,10 +79,79 @@ func (md *MasqDevice) Write(p []byte) (n int, err error) {
 }
 
 func (md *MasqDevice) masqOut(data []byte) {
-	_ = IPPacket(data)
+	packet := IPPacket(data)
+	switch packet.Protocol() {
+	case ProtocolTCP:
+		payload := TCPPacket(packet.Payload())
+		port, err := md.TCPMapper.MapOut(packet.SrcIP(), payload.Port())
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		packet.SetSrcIP(md.DeviceIP())
+		payload.SetPort(port)
+		packet.Resum()
+		payload.Resum(md.DeviceIP(), packet.DestIP())
+	case ProtocolUDP:
+		payload := UDPPacket(packet.Payload())
+		port, err := md.UDPMapper.MapOut(packet.SrcIP(), payload.Port())
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		packet.SetSrcIP(md.DeviceIP())
+		payload.SetPort(port)
+		packet.Resum()
+		payload.Resum(md.DeviceIP(), packet.DestIP())
+	case ProtocolICMP:
+		payload := ICMPPacket(packet.Payload())
+		id, err := md.ICMPMapper.MapOut(packet.SrcIP(), payload.ID())
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		packet.SetSrcIP(md.DeviceIP())
+		payload.SetID(id)
+		packet.Resum()
+		payload.Resum()
+	}
 }
 
 func (md *MasqDevice) masqIn(data []byte) {
-	_ = IPPacket(data)
-
+	packet := IPPacket(data)
+	switch packet.Protocol() {
+	case ProtocolTCP:
+		payload := TCPPacket(packet.Payload())
+		ip, port, err := md.TCPMapper.MapIn(payload.Port())
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		packet.SetDestIP(ip)
+		payload.SetPort(port)
+		packet.Resum()
+		payload.Resum(packet.SrcIP(), ip)
+	case ProtocolUDP:
+		payload := UDPPacket(packet.Payload())
+		ip, port, err := md.UDPMapper.MapIn(payload.Port())
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		packet.SetDestIP(ip)
+		payload.SetPort(port)
+		packet.Resum()
+		payload.Resum(packet.SrcIP(), ip)
+	case ProtocolICMP:
+		payload := ICMPPacket(packet.Payload())
+		ip, id, err := md.ICMPMapper.MapIn(payload.ID())
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		packet.SetDestIP(ip)
+		payload.SetID(id)
+		packet.Resum()
+		payload.Resum()
+	}
 }

@@ -15,7 +15,7 @@ func StartDevice(src, dest net.IP) error {
 	if err != nil {
 		return err
 	}
-	Device = device
+	Device = tun.NewMasqDevice(device)
 	return nil
 }
 
