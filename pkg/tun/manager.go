@@ -110,3 +110,13 @@ func convertIPToInt(ip net.IP) uint32 {
 	}
 	return value
 }
+
+// convertIntToIP converts a value to IP
+func convertIntToIP(v uint32) net.IP {
+	ip := make(net.IP, 4)
+	for i := 0; i < 4 && v > 0; i++ {
+		ip[3-i] = byte(v)
+		v >>= 8
+	}
+	return ip
+}

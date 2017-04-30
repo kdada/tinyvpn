@@ -16,6 +16,8 @@ const (
 // Device describes an tunnel device. Read/Write one ip packet at once.
 type Device interface {
 	io.ReadWriteCloser
+	// DeviceIP returns device ip
+	DeviceIP() net.IP
 	// AddRoute adds route for device
 	AddRoute(r *net.IPNet) error
 	// ClearRoutes clears all routes
@@ -42,6 +44,11 @@ type CommonDevice struct {
 	addRoute func(r *net.IPNet) error
 	// deleteRoute delete a route from system route table
 	deleteRoute func(r *net.IPNet) error
+}
+
+// DeviceIP returns device ip
+func (d *CommonDevice) DeviceIP() net.IP {
+	return d.SrcIP
 }
 
 // AddRoute adds route for device
