@@ -68,17 +68,13 @@ func (md *MasqDevice) Read(p []byte) (n int, err error) {
 	if err != nil {
 		return
 	}
-	fmt.Println("r1", p[:n])
 	md.masqOut(p[:n])
-	fmt.Println("r2", p[:n])
 	return
 }
 
 // Write a packet
 func (md *MasqDevice) Write(p []byte) (n int, err error) {
-	fmt.Println("w1", p)
 	md.masqIn(p)
-	fmt.Println("w2", p)
 	return md.Device.Write(p)
 }
 
