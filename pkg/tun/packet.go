@@ -19,7 +19,7 @@ func (ip IPPacket) HeaderLength() int {
 
 // Length returns total length of the packet
 func (ip IPPacket) Length() int {
-	return int(ip[2]) << 8 & int(ip[3])
+	return int(ip[2])<<8 + int(ip[3])
 }
 
 // Payload returns packet body
@@ -70,7 +70,7 @@ func (ip IPPacket) Resum() {
 // sum calculates check sum of data
 func sum(data []byte) uint16 {
 	var result uint32 = 0
-	for i := 0; i < len(data); i += 2 {
+	for i := 0; i < len(data)-1; i += 2 {
 		result += uint32(data[i])<<8 + uint32(data[i+1])
 	}
 	if len(data)%2 == 1 {
@@ -96,18 +96,26 @@ func ipsum(srcIP, destIP net.IP, protocol byte, data []byte) uint16 {
 	for result&0xffff0000 != 0 {
 		result = result>>16 + result&0x0000ffff
 	}
-	return uint16(result)
+	return ^uint16(result)
 }
 
 type TCPPacket []byte
 
-func (tcp TCPPacket) Port() uint16 {
+func (tcp TCPPacket) SrcPort() uint16 {
 	return uint16(tcp[0])<<8 + uint16(tcp[1])
 }
 
-func (tcp TCPPacket) SetPort(port uint16) {
+func (tcp TCPPacket) SetSrcPort(port uint16) {
 	tcp[0] = byte(port >> 8)
 	tcp[1] = byte(port)
+}
+func (tcp TCPPacket) DestPort() uint16 {
+	return uint16(tcp[2])<<8 + uint16(tcp[3])
+}
+
+func (tcp TCPPacket) SetDestPort(port uint16) {
+	tcp[2] = byte(port >> 8)
+	tcp[3] = byte(port)
 }
 
 // Resum recalculates the check sum of current packet
@@ -121,13 +129,22 @@ func (tcp TCPPacket) Resum(srcIP, destIP net.IP) {
 
 type UDPPacket []byte
 
-func (udp UDPPacket) Port() uint16 {
+func (udp UDPPacket) SrcPort() uint16 {
 	return uint16(udp[0])<<8 + uint16(udp[1])
 }
 
-func (udp UDPPacket) SetPort(port uint16) {
+func (udp UDPPacket) SetSrcPort(port uint16) {
 	udp[0] = byte(port >> 8)
 	udp[1] = byte(port)
+}
+
+func (udp UDPPacket) DestPort() uint16 {
+	return uint16(udp[2])<<8 + uint16(udp[3])
+}
+
+func (udp UDPPacket) SetDestPort(port uint16) {
+	udp[2] = byte(port >> 8)
+	udp[3] = byte(port)
 }
 
 // Resum recalculates the check sum of current packet

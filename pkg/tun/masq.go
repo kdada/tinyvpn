@@ -68,13 +68,17 @@ func (md *MasqDevice) Read(p []byte) (n int, err error) {
 	if err != nil {
 		return
 	}
+	fmt.Println("r1", p[:n])
 	md.masqOut(p[:n])
+	fmt.Println("r2", p[:n])
 	return
 }
 
 // Write a packet
 func (md *MasqDevice) Write(p []byte) (n int, err error) {
+	fmt.Println("w1", p)
 	md.masqIn(p)
+	fmt.Println("w2", p)
 	return md.Device.Write(p)
 }
 
@@ -83,24 +87,24 @@ func (md *MasqDevice) masqOut(data []byte) {
 	switch packet.Protocol() {
 	case ProtocolTCP:
 		payload := TCPPacket(packet.Payload())
-		port, err := md.TCPMapper.MapOut(packet.SrcIP(), payload.Port())
+		port, err := md.TCPMapper.MapOut(packet.SrcIP(), payload.SrcPort())
 		if err != nil {
 			log.Println(err)
 			return
 		}
 		packet.SetSrcIP(md.DeviceIP())
-		payload.SetPort(port)
+		payload.SetSrcPort(port)
 		packet.Resum()
 		payload.Resum(md.DeviceIP(), packet.DestIP())
 	case ProtocolUDP:
 		payload := UDPPacket(packet.Payload())
-		port, err := md.UDPMapper.MapOut(packet.SrcIP(), payload.Port())
+		port, err := md.UDPMapper.MapOut(packet.SrcIP(), payload.SrcPort())
 		if err != nil {
 			log.Println(err)
 			return
 		}
 		packet.SetSrcIP(md.DeviceIP())
-		payload.SetPort(port)
+		payload.SetSrcPort(port)
 		packet.Resum()
 		payload.Resum(md.DeviceIP(), packet.DestIP())
 	case ProtocolICMP:
@@ -122,24 +126,24 @@ func (md *MasqDevice) masqIn(data []byte) {
 	switch packet.Protocol() {
 	case ProtocolTCP:
 		payload := TCPPacket(packet.Payload())
-		ip, port, err := md.TCPMapper.MapIn(payload.Port())
+		ip, port, err := md.TCPMapper.MapIn(payload.DestPort())
 		if err != nil {
 			log.Println(err)
 			return
 		}
 		packet.SetDestIP(ip)
-		payload.SetPort(port)
+		payload.SetDestPort(port)
 		packet.Resum()
 		payload.Resum(packet.SrcIP(), ip)
 	case ProtocolUDP:
 		payload := UDPPacket(packet.Payload())
-		ip, port, err := md.UDPMapper.MapIn(payload.Port())
+		ip, port, err := md.UDPMapper.MapIn(payload.DestPort())
 		if err != nil {
 			log.Println(err)
 			return
 		}
 		packet.SetDestIP(ip)
-		payload.SetPort(port)
+		payload.SetDestPort(port)
 		packet.Resum()
 		payload.Resum(packet.SrcIP(), ip)
 	case ProtocolICMP:
