@@ -151,7 +151,7 @@ func (udp UDPPacket) SetDestPort(port uint16) {
 func (udp UDPPacket) Resum(srcIP, destIP net.IP) {
 	udp[6] = 0
 	udp[7] = 0
-	result := ipsum(srcIP, destIP, ProtocolTCP, udp)
+	result := ipsum(srcIP, destIP, ProtocolUDP, udp)
 	udp[6] = byte(result >> 8)
 	udp[7] = byte(result)
 }
