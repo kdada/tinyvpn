@@ -158,6 +158,13 @@ func (udp UDPPacket) Resum(srcIP, destIP net.IP) {
 
 type ICMPPacket []byte
 
+func (icmp ICMPPacket) Type() byte {
+	return icmp[0]
+}
+
+func (icmp ICMPPacket) Code() byte {
+	return icmp[1]
+}
 func (icmp ICMPPacket) ID() uint16 {
 	return uint16(icmp[4])<<8 + uint16(icmp[5])
 }

@@ -144,14 +144,16 @@ func (md *MasqDevice) masqIn(data []byte) {
 		payload.Resum(packet.SrcIP(), ip)
 	case ProtocolICMP:
 		payload := ICMPPacket(packet.Payload())
-		ip, id, err := md.ICMPMapper.MapIn(payload.ID())
-		if err != nil {
-			log.Println(err)
-			return
+		if payload.Code() == 0 && (payload.Type() == 8 || payload.Type() == 0) {
+			ip, id, err := md.ICMPMapper.MapIn(payload.ID())
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			packet.SetDestIP(ip)
+			payload.SetID(id)
+			packet.Resum()
+			payload.Resum()
 		}
-		packet.SetDestIP(ip)
-		payload.SetID(id)
-		packet.Resum()
-		payload.Resum()
 	}
 }

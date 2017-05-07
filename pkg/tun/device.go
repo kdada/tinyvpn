@@ -10,7 +10,7 @@ const (
 	// Ignore 802.1Q tag.
 	MinPacketSize = 20 //46
 	// MaxPacketSize limits the max size of a packet in ethernet payload.
-	MaxPacketSize = 65535 //1500
+	MaxPacketSize = 1500
 )
 
 // Device describes an tunnel device. Read/Write one ip packet at once.
